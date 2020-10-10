@@ -11,6 +11,8 @@ struct Constants {
     static let logInKey = "LoggedIn"
     static let tweetCellId = "tweetCell"
     static let loadingCell = "loadingCell"
+    static let defaultNumberOfTweets = 7
+    static let defaultNumberOfTweetsStepper = 3
 }
 
 struct TwitterApiConstants {
@@ -20,8 +22,9 @@ struct TwitterApiConstants {
     static let tweetUserKey = "user"
     static let currentUserRetweetedKey = "retweeted" // returns bool that says if current user retweeted the tweet
     static let retweetedCountKey = "retweet_count"
-    static let  currentUserFavoritedKey = "favorited" // returns bool
+    static let currentUserFavoritedKey = "favorited" // returns bool
     static let favoritedCountKey = "favorite_count"
+    static let numberOfTweetsKey = "count"
     struct User {
         static let tweetCreatorNameKey = "name"
         static let tweetCreatorHandleKey = "screen_name"

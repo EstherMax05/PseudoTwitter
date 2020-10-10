@@ -9,14 +9,20 @@
 import UIKit
 
 class HomeViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-    var numberOfTweets = 1
+    var numberOfTweets = Constants.defaultNumberOfTweets
     var tweetArray = [NSDictionary]()
     var isDoneLoading = false {
         didSet {
-            numberOfTweets = tweetArray.count
-            tableView.reloadData()
+            if isDoneLoading == true {
+                tableView.reloadData()
+                if self.tableRefreshControl.isRefreshing {
+                    self.tableRefreshControl.endRefreshing()
+                }
+            }
         }
     }
+    
+    let tableRefreshControl = UIRefreshControl()
     
     @IBOutlet var tableView: UITableView!
     @IBAction func logoutTapped(_ sender: UIBarButtonItem) {
@@ -26,8 +32,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print("numberOfTweets: ", numberOfTweets)
-        return numberOfTweets
+        return max(tweetArray.count, 1)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -65,7 +70,7 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
     }
     
     func getTweets() {
-        TwitterAPICaller.client?.getDictionariesRequest(url: TwitterApiConstants.getStatusesURL, parameters: ["count": 200], success: { (tweets: [NSDictionary]) in
+        TwitterAPICaller.client?.getDictionariesRequest(url: TwitterApiConstants.getStatusesURL, parameters: [TwitterApiConstants.numberOfTweetsKey: numberOfTweets], success: { (tweets: [NSDictionary]) in
             self.tweetArray.removeAll()
             for tweet in tweets {
                 self.tweetArray.append(tweet)
@@ -73,17 +78,26 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
             self.isDoneLoading = true
         }, failure: { (Error) in
             print("Tweet retrieval failed")
+            if self.tableRefreshControl.isRefreshing {
+                self.tableRefreshControl.endRefreshing()
+            }
         })
+        numberOfTweets += Constants.defaultNumberOfTweetsStepper
+        
+    }
+    
+    @objc func getTweetsAction() {
+        numberOfTweets = Constants.defaultNumberOfTweets
+        getTweets()
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.dataSource = self
         tableView.delegate = self
-//        tableView.estimatedRowHeight = view.frame.height
-//        tableView.rowHeight = UITableView.automaticDimension
         getTweets()
-        // Do any additional setup after loading the view.
+        tableRefreshControl.addTarget(self, action: #selector(getTweetsAction), for: .valueChanged)
+        tableView.refreshControl = tableRefreshControl
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -93,6 +107,12 @@ class HomeViewController: UIViewController, UITableViewDelegate, UITableViewData
         return UITableView.automaticDimension
     }
     
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row+1 == tweetArray.count && isDoneLoading {
+            numberOfTweets += Constants.defaultNumberOfTweetsStepper
+            getTweets()
+        }
+    }
 
     /*
     // MARK: - Navigation
