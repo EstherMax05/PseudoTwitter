@@ -40,10 +40,12 @@ class TwitterAPICaller: BDBOAuth1SessionManager {
     }
     
     func getDictionaryRequest(url: String, parameters: [String:Any], success: @escaping (NSDictionary) -> (), failure: @escaping (Error) -> ()){
+        print(parameters)
         TwitterAPICaller.client?.get(url, parameters: parameters, progress: nil, success: { (task: URLSessionDataTask, response: Any?) in
             success(response as! NSDictionary)
         }, failure: { (task: URLSessionDataTask?, error: Error) in
             failure(error)
+            print("error_get_dict: ,", error)
         })
     }
     
@@ -62,6 +64,29 @@ class TwitterAPICaller: BDBOAuth1SessionManager {
             success()
         }, failure: { (task: URLSessionDataTask?, error: Error) in
             failure(error)
+            print("error: ,", error)
+        })
+    }
+    
+    /**
+     Post tweet:
+     parameters: NSDictionary = ["status": tweet_string ]
+     */
+    func postRequest(url: String, parameters: [String:Any], success: @escaping () -> (), failure: @escaping (Error) -> ()){
+        TwitterAPICaller.client?.post(url, parameters: parameters, progress: nil, success: { (task: URLSessionDataTask, response: Any?) in
+            success()
+        }, failure: { (task: URLSessionDataTask?, error: Error) in
+            failure(error)
+            print("error: ,", error)
+        })
+    }
+    
+    func likeTweet(url: String, parameters: [String:Any], success: @escaping () -> (), failure: @escaping (Error) -> ()){
+        TwitterAPICaller.client?.post(url, parameters: parameters, progress: nil, success: { (task: URLSessionDataTask, response: Any?) in
+            success()
+        }, failure: { (task: URLSessionDataTask?, error: Error) in
+            failure(error)
+            print("error: ,", error)
         })
     }
     
